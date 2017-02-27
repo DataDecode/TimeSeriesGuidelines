@@ -1,0 +1,262 @@
+---
+title: "Time Series Notes"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Quandl)
+
+data = Quandl("FRED/GDP", type="ts")
+```
+
+**Data in XTS**
+*Warning* you may need to use base R when using XTS (rather than dplyr)
+data_xts <- as.xts(data)
+
+The time extraction feature is a powerful addition to time series and allows you to subset data more effectively. XTS follows the IS)-8601 standard for dates and times.
+
+YYYY-MM-DD-T(denotes time)HH-MM-SS-SubS
+Ex. 20040101T00:01:01  (2004-01-01 At 12:01 and 1 second)
+
+first() and last() help to isolate data with specific time perameters
+
+```{r}
+data_xts<- as.xts(data)
+
+first(data_xts, "2 years")
+```
+
+The merge() argument allows for the merging of time series based on times. this can join inner, outer, left and right.  The fill arguement handles missing arguments and what you put in as the value.
+```{r}
+merge(...., fill = NA, join= "outer")
+```
+
+You can fill NAs with the last observation available. This can be 
+na.locf(object, na.rm = TRUE, fromLast = FALSE, maxgap= Inf)
+
+You can interpolate NAs in zoo.  This is linear interpretation between observations.
+na.approx()
+
+*For Iregular Data*
+endpoints(x, on = "years")  takes the last value for each year regaurdless of when than end it.
+
+period.apply(x, INDEX = , FUN)  This is used as a apply within XTS data.
+
+apply.monthly, apply.yearly, apply.quarterly takes care of the indexing calculation automatically.
+
+split.xts()  splits the data into smaller junks and indexes them broken down into those periods.
+
+to.period shows the variation over a given period.
+
+There you can calculate values for descrite windows of time.  Like the month to date calculation for sales.
+
+There are also TimeZone Features.  The format of time can be changed.
+
+indexFormat(Z) <- "%b %d, %Y" # gives Aug 09, 2016 format
+Sys.setenv() sets the timezone of the computer
+help(OlsonNames)
+
+**Basic assumption of Time Series**
+Consecutive observations are equally spaced and can apply discrete-time observation index.  This may not actually hold with missing observations. An example of this is stock data that has missing observations for weekend day and holidays.
+
+Time series models are fundamentally built around white noise.  Autoreregression (AR) is self regression by judging today on yesterday.  Moving Average (MA) assumes that the white noise of the regressions are correlated.
+
+We assume that the time series is stationary.  This means the mean is constant and the correlation structure is the same.  Any stationary time serries can be represented as a liniar combination of white noise.
+
+*Converting Data into Time Series*
+ts(____, start= , frequency = )
+
+*Data Exploration Functions*
+```{r cars}
+start(data)
+end(data)
+frequency(data)
+deltat(data)
+cycle(data)
+ts.plot(data)
+
+#XTS functions
+peridoicity(data_xts)  #This indicates how often the period of the data is.  Is it hourly, daily, monthly, ect.
+
+#number of periods in the data
+nseconds()
+nminutes()
+...
+ndays()
+nweeks()
+nquarters()
+
+indexyday() #gives the day in the year the data is.
+align.time() #rounds time stamps
+make.index.unique() #allows for the removal of duplacaite time series.
+
+
+```
+
+*Transformations*
+
+log() 
+This can liniarize exponential growth trends
+
+diff()
+First differencing focuses on the difference between 
+two observations rather than change on an absolute scale.
+
+diff() with a seasonal differencing can help remove seasonal components.
+
+*White Noise stationary*
+*A Fixed, Constant mean
+*A fixed, constant variance
+*No correlation over time
+
+white_noise_2 <- arima.sim(model = list(order = c(0, 0, 0)), n = 100, mean = 100, sd = 10)
+
+**Random Walk**
+A Random walk is a non-stationary time series.
+*No specified mean or variance
+*Strong Dependence over time
+*Its changes or incrememnts follow a white noise pattern
+
+*Random walk is the pervious observation plus Noise*
+This can be reatanged as a first difference series. The first difference of a random walk series is just a white noise series
+
+*Random Walk with a drift*
+$$
+Y = Constant + Lag + Random Noise
+
+$$
+
+
+A parsimonious model is a model that accomplishes a desired level of explanation or prediction with as few predictor variables as possible.
+
+**Stationarity**
+Stationary models:
+*Have distributional stability over time
+*Fluctuate randomly
+*Shows random oscillation around some fixed level.  This is called mean-reversion.
+
+*Weak Stationary*
+The mean, variance, and covariance are constant over time.
+
+Is there a good way to check if covariance is constant over time?
+
+```{r cars}
+white_noise <- arima.sim(list(order = c(0, 0, 0)), n=100)
+
+# Use cumsum() to convert your WN data to RW
+random_walk <- cumsum(white_noise)
+  
+# Use arima.sim() to generate WN drift data
+wn_drift <- arima.sim(list(order = c(0, 0, 0)), n=100, mean=.4)
+  
+# Use cumsum() to convert your WN drift data to RW
+rw_drift <- cumsum(wn_drift)
+
+# Plot all four data objects
+plot.ts(cbind(white_noise, random_walk, wn_drift, rw_drift))
+```
+
+**Comparing Two Time Series**
+The best way to visually compare two time series is through scatterplot:
+plot(DAX, FTSE)
+
+A scatterplot matrix is also available:
+pairs(eu_stocks)
+
+*Covariance and Correlations*
+cov(x, y)
+corr(x, y)
+Correlation only measures the liniar relationship.  There could still be a relationship between the series.
+
+Cov() and corr() on a data frame will give a matrix.
+
+**Autocorrelation**
+This is within one time series that has a strong correlation with previous observations of the same series.  An AR model is measuring differences between the observations and the mean in today's value and lagged values.
+
+Autoregressive is a stochastic process used in statistical calculations in which future values are estimated based on a weighted sum of past values. An autoregressive process operates under the premise that past values have an effect on current values.
+
+$$Y_t - \mu = Slope * (Y_{t-1}-\mu)+\epsilon_t$$
+
+$$\epsilon_t = (Mean=0,Variance)$$
+
+The residuals of the model are just the difference between what we estimate the point to be and the actual observation.
+
+```{r}
+# Define x_t0 as x[-1]
+x_t0 <- data[-1]
+
+# Define x_t1 as x[-n]
+x_t1 <- data[-n]
+# Confirm that x_t0 and x_t1 are (x[t], x[t-1]) pairs  
+head(cbind(x_t0, x_t1))
+  
+# Plot x_t0 and x_t1
+plot(x_t0, x_t1)
+
+# Use acf with x
+acf(data, lag.max = 1, plot = FALSE)
+```
+
+**Moving Average Models**
+$$Y_t = \mu + \epsilon_t + \theta\epsilon_{t-1}$$
+The error term and the pervious error term are mean zero white noise.  If the slope of the lagged error is zero, this is just white noise.  If it's not zero, then Y is autocorrelated with past white noise.
+
+This is seen as mean reverting.  It is the estimate of today given the noise of the noise from the lags.
+
+The fit of an AR and MA model are similare if it's a single lag with a magnatude under 0.5
+
+**Using ACF and PACF**
+        AR(p)             MA(q)             ARMA(p,q)
+ACF     Tails off         Cuts off lag q    Tails off
+PACF    Cuts off lag p    Tails off         Tails off
+
+**Seasonal Variation**
+Look at the period between seasonality for the base ARIMA.  The other option is to solve for the seasonality first, then look at the resulting ARIMA pattern.
+
+For seasonal percestance (a seasonal variation that is very constant over time), this can be taken care of by seasonal differencing.
+
+diff(x, lag = n)  where n is the period of differencing.  This can be done on already differenced data.
+
+**Goodness of Fit**
+A lower value of AIC and BIC (Basyesian Infomation Criterion) generally indicates a better fitting model.
+
+Using sarima() from the astsa package will give ttest and p values for the ARMA lags (under $ttable)
+
+*Residual Analysis*
+Q-Q Plot
+Q-Statistic p-values- All the values should be above the line
+
+**Forecasting**
+```{r}
+data_ar <- arima(data, order = c(1, 0, 0))
+print(data_ar)
+
+
+AR_fitted <- data_ar - residuals(data_ar)
+
+ts.plot(data_ar)
+points(AR_fitted, type = "l", col = 2, lty = 2)
+
+predict_AR <- predict(data_ar, n.ahead = 10)
+
+#How to put this into a graph
+AR_forecast <- predict(data_ar, n.ahead = 10)$pred
+AR_forecast_se <- predict(data_ar, n.ahead = 10)$se
+points(AR_forecast, type = "l", col = 2)
+points(AR_forecast - 2*AR_forecast_se, type = "l", col = 2, lty = 2)
+points(AR_forecast + 2*AR_forecast_se, type = "l", col = 2, lty = 2)
+
+```
+
+
+
+
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
