@@ -11,7 +11,6 @@ data = Quandl("FRED/GDP", type="ts")
 ```
 
 **Data in XTS**
-**TEST**
 *Warning* you may need to use base R when using XTS (rather than dplyr)
 data_xts <- as.xts(data)
 
