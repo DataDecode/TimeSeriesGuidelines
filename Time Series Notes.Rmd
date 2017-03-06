@@ -3,6 +3,10 @@ title: "Time Series Notes"
 output: pdf_document
 ---
 
+Work through this book: http://www.leg.ufpr.br/lib/exe/fetch.php/disciplinas:time_series_analysis_with_applications_in_r_2nd.pdf 
+
+Prophet - 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(Quandl)
@@ -172,6 +176,7 @@ Correlation only measures the liniar relationship.  There could still be a relat
 Cov() and corr() on a data frame will give a matrix.
 
 **Autocorrelation**
+Correlation is the unitless linear dependance between two variables.
 This is within one time series that has a strong correlation with previous observations of the same series.  An AR model is measuring differences between the observations and the mean in today's value and lagged values.
 
 Autoregressive is a stochastic process used in statistical calculations in which future values are estimated based on a weighted sum of past values. An autoregressive process operates under the premise that past values have an effect on current values.
