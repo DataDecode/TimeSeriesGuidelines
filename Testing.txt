@@ -1,0 +1,24 @@
+---
+title: "Data Visualization"
+output: html_document
+---
+
+Changing1231
+Below is an basic grouping of data visualization techniques.  If the below does not have what you're looking for, then the next best place to look is here: https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf 
+
+Start here: http://r4ds.had.co.nz/data-visualisation.html 
+
+Make sure to read this about creating themes and templates: http://moderngraphics11.pbworks.com/f/ggplot2-Book09hWickham.pdf 
+
+```{r}
+library(ggplot2)
+
+mpg_data<- ggplot2::mpg
+```
+
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
