@@ -2,7 +2,7 @@
 title: "Time Series Notes"
 output: pdf_document
 ---
-
+Changed
 Work through this book: http://www.leg.ufpr.br/lib/exe/fetch.php/disciplinas:time_series_analysis_with_applications_in_r_2nd.pdf 
 
 Prophet - 
