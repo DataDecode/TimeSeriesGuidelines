@@ -3,6 +3,7 @@ title: "Data Visualization"
 output: html_document
 ---
 
+Changing
 Below is an basic grouping of data visualization techniques.  If the below does not have what you're looking for, then the next best place to look is here: https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf 
 
 Start here: http://r4ds.had.co.nz/data-visualisation.html 
